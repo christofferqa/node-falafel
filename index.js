@@ -30,6 +30,10 @@ module.exports = function (src, opts, fn) {
     
     (function walk (node, parent) {
         insertHelpers(node, parent, result.chunks);
+
+        if (opts.visit) {
+            opts.visit(node);
+        }
         
         forEach(objectKeys(node), function (key) {
             if (key === 'parent') return;
