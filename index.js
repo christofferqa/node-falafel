@@ -29,7 +29,7 @@ module.exports = function (src, opts, fn) {
     var index = 0;
     
     (function walk (node, parent) {
-        insertHelpers(node, parent, result.chunks);
+        var update = insertHelpers(node, parent, result.chunks);
 
         if (opts.visit) {
             opts.visit(node);
@@ -50,7 +50,7 @@ module.exports = function (src, opts, fn) {
                 walk(child, node);
             }
         });
-        fn(node);
+        fn(node, update);
     })(ast, undefined);
     
     return result;
@@ -63,21 +63,10 @@ function insertHelpers (node, parent, chunks) {
         return chunks.slice(node.start, node.end).join('');
     };
     
-    if (node.update && typeof node.update === 'object') {
-        var prev = node.update;
-        forEach(objectKeys(prev), function (key) {
-            update[key] = prev[key];
-        });
-        node.update = update;
-    }
-    else {
-        node.update = update;
-    }
-    
-    function update (s) {
+    return function update (s) {
         chunks[node.start] = s;
         for (var i = node.start + 1; i < node.end; i++) {
             chunks[i] = '';
         }
-    }
+    };
 }
